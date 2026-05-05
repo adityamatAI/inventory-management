@@ -1,23 +1,26 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import axiosInstance from '../../api/axiosInstance';
+import Pagination from '../../components/Pagination';
+
+const ITEMS_PER_PAGE = 6;
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
 
   // Create form state
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createForm, setCreateForm] = useState({ username: '', password: '', role_id: '' });
   const [createLoading, setCreateLoading] = useState(false);
-  const [createError, setCreateError] = useState(null);
 
   // Edit modal state
-  const [editingUser, setEditingUser] = useState(null); // holds the user being edited
+  const [editingUser, setEditingUser] = useState(null);
   const [editForm, setEditForm] = useState({ role_id: '', is_active: 1 });
   const [editLoading, setEditLoading] = useState(false);
-  const [editError, setEditError] = useState(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -30,7 +33,9 @@ function UserManagement() {
       setUsers(userRes.data);
       setRoles(roleRes.data);
     } catch (err) {
-      setError('Failed to load user data.');
+      const msg = 'Failed to load user data.';
+      setError(msg);
+      toast.error(msg);
       console.error(err);
     } finally {
       setLoading(false);
@@ -43,18 +48,19 @@ function UserManagement() {
   const handleCreate = async (e) => {
     e.preventDefault();
     setCreateLoading(true);
-    setCreateError(null);
+    const loadingToast = toast.loading('Creating user...');
     try {
       await axiosInstance.post('/admin/users', {
         username: createForm.username,
         password: createForm.password,
         role_id: parseInt(createForm.role_id),
       });
+      toast.success(`User "${createForm.username}" created successfully.`, { id: loadingToast });
       setCreateForm({ username: '', password: '', role_id: '' });
       setShowCreateForm(false);
       fetchData();
     } catch (err) {
-      setCreateError(err.response?.data?.error || 'Failed to create user.');
+      toast.error(err.response?.data?.error || 'Failed to create user.', { id: loadingToast });
     } finally {
       setCreateLoading(false);
     }
@@ -65,26 +71,29 @@ function UserManagement() {
     const role = roles.find(r => r.name === user.role);
     setEditingUser(user);
     setEditForm({ role_id: role?.id || '', is_active: user.is_active });
-    setEditError(null);
   };
 
   // ── Save Edit ─────────────────────────────────────────────────
   const handleEditSave = async () => {
     setEditLoading(true);
-    setEditError(null);
+    const loadingToast = toast.loading('Saving changes...');
     try {
       await axiosInstance.put(`/admin/users/${editingUser.id}`, {
         role_id: parseInt(editForm.role_id),
         is_active: parseInt(editForm.is_active),
       });
+      toast.success(`User "${editingUser.username}" updated.`, { id: loadingToast });
       setEditingUser(null);
       fetchData();
     } catch (err) {
-      setEditError(err.response?.data?.error || 'Failed to update user.');
+      toast.error(err.response?.data?.error || 'Failed to update user.', { id: loadingToast });
     } finally {
       setEditLoading(false);
     }
   };
+
+  const totalPages = Math.ceil(users.length / ITEMS_PER_PAGE);
+  const paginated  = users.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   if (loading) return (
     <div className="flex justify-center items-center h-48">
@@ -157,12 +166,11 @@ function UserManagement() {
                 ))}
               </select>
             </div>
-            <div className="md:col-span-3 flex items-center gap-3">
-              {createError && <p className="text-red-600 text-sm">{createError}</p>}
+            <div className="md:col-span-3 flex justify-end">
               <button
                 type="submit"
                 disabled={createLoading}
-                className="ml-auto bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
               >
                 {createLoading ? 'Creating...' : 'Create User'}
               </button>
@@ -184,10 +192,10 @@ function UserManagement() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.length === 0 && (
+            {paginated.length === 0 && (
               <tr><td colSpan="5" className="text-center py-10 text-gray-400 italic">No users found.</td></tr>
             )}
-            {users.map(u => (
+            {paginated.map(u => (
               <tr key={u.id} className={`hover:bg-gray-50 transition-colors ${!u.is_active ? 'opacity-60' : ''}`}>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
@@ -220,6 +228,7 @@ function UserManagement() {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
       {/* Edit Modal */}
       {editingUser && (
@@ -272,7 +281,6 @@ function UserManagement() {
                 </div>
               </div>
 
-              {editError && <p className="text-red-600 text-sm">{editError}</p>}
             </div>
 
             <div className="flex gap-3 mt-6">

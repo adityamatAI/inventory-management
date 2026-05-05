@@ -32,7 +32,9 @@ const initializeDB = () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       contact_email TEXT,
-      user_id INTEGER REFERENCES users(id)
+      user_id INTEGER REFERENCES users(id),
+      latitude  REAL,
+      longitude REAL
     );
 
     CREATE TABLE IF NOT EXISTS items (
@@ -80,6 +82,18 @@ const initializeDB = () => {
     );
   `);
   console.log('Database tables verified/initialized successfully.');
+
+  // Migration: safely add lat/lng to suppliers if they don't exist yet
+  // (handles databases created before this column was added)
+  const supplierCols = db.pragma('table_info(suppliers)').map(c => c.name);
+  if (!supplierCols.includes('latitude')) {
+    db.exec('ALTER TABLE suppliers ADD COLUMN latitude REAL');
+    console.log('Migration: added latitude to suppliers');
+  }
+  if (!supplierCols.includes('longitude')) {
+    db.exec('ALTER TABLE suppliers ADD COLUMN longitude REAL');
+    console.log('Migration: added longitude to suppliers');
+  }
 };
 
 module.exports = { db, initializeDB };

@@ -30,6 +30,21 @@ router.get('/roles', (req, res) => {
   res.json(getAllRoles());
 });
 
+// --- Suppliers (for map view) ---
+router.get('/suppliers', (req, res) => {
+  const suppliers = db.prepare(`
+    SELECT 
+      s.id, s.name, s.contact_email, s.latitude, s.longitude,
+      COUNT(CASE WHEN rr.status NOT IN ('closed', 'rejected') THEN 1 END) as active_requests
+    FROM suppliers s
+    LEFT JOIN replenishment_requests rr ON rr.supplier_id = s.id
+    GROUP BY s.id
+    ORDER BY s.name
+  `).all();
+  res.json(suppliers);
+});
+
+
 // --- Audit Log ---
 const { db } = require('../config/database');
 

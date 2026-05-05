@@ -51,6 +51,11 @@ const insertSupplier = db.prepare(`
 insertSupplier.run(1, 'Fresh Farms Co.',   'orders@freshfarms.com',        4);
 insertSupplier.run(2, 'Global Groceries',  'supply@globalgroceries.com',   null);
 
+// Add coordinates (UAE locations for demo)
+db.prepare('UPDATE suppliers SET latitude = ?, longitude = ? WHERE id = ?').run(25.2048, 55.2708, 1); // Dubai
+db.prepare('UPDATE suppliers SET latitude = ?, longitude = ? WHERE id = ?').run(24.4539, 54.3773, 2); // Abu Dhabi
+
+
 // ── 4. Items (8 total, 3 below threshold) ─────────────────────────────────────
 const insertItem = db.prepare(`
   INSERT OR IGNORE INTO items (id, name, sku, current_qty, min_threshold, refill_qty, supplier_id) 

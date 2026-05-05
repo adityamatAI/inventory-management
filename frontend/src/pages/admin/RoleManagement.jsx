@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import axiosInstance from '../../api/axiosInstance';
+import Pagination from '../../components/Pagination';
+
+const ITEMS_PER_PAGE = 6;
 
 const ROLE_COLORS = {
   admin: 'bg-red-50 text-red-700 border-red-200',
@@ -13,9 +17,10 @@ function RoleManagement() {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [savingId, setSavingId] = useState(null); // tracks which user row is being saved
-  const [savedId, setSavedId] = useState(null);   // tracks which row just succeeded (for brief feedback)
-  const [pendingRoles, setPendingRoles] = useState({}); // { userId: role_id } for unsaved changes
+  const [savingId, setSavingId] = useState(null);
+  const [savedId, setSavedId] = useState(null);
+  const [pendingRoles, setPendingRoles] = useState({});
+  const [page, setPage] = useState(1);
 
   const fetchData = async () => {
     setLoading(true);
@@ -50,22 +55,27 @@ function RoleManagement() {
     if (!newRoleId) return;
 
     setSavingId(user.id);
+    const newRoleName = roles.find(r => r.id == newRoleId)?.name || 'new role';
+    const loadingToast = toast.loading(`Updating role for ${user.username}...`);
     try {
       await axiosInstance.put(`/admin/users/${user.id}`, {
         role_id: parseInt(newRoleId),
         is_active: user.is_active,
       });
-      // Clear the pending change and show success briefly
       setPendingRoles(prev => { const n = { ...prev }; delete n[user.id]; return n; });
       setSavedId(user.id);
+      toast.success(`${user.username}'s role updated to "${newRoleName}".`, { id: loadingToast });
       setTimeout(() => setSavedId(null), 2000);
       fetchData();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to update role.');
+      toast.error(err.response?.data?.error || 'Failed to update role.', { id: loadingToast });
     } finally {
       setSavingId(null);
     }
   };
+
+  const totalPages = Math.ceil(users.length / ITEMS_PER_PAGE);
+  const paginated  = users.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   if (loading) return (
     <div className="flex justify-center items-center h-48">
@@ -112,10 +122,10 @@ function RoleManagement() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.length === 0 && (
+            {paginated.length === 0 && (
               <tr><td colSpan="5" className="text-center py-10 text-gray-400 italic">No users found.</td></tr>
             )}
-            {users.map(u => {
+            {paginated.map(u => {
               const currentRoleId = getRoleId(u.role);
               const pendingRoleId = pendingRoles[u.id];
               const hasChange = pendingRoleId && pendingRoleId != currentRoleId;
@@ -178,6 +188,7 @@ function RoleManagement() {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../api/axiosInstance';
 import UserManagement from './UserManagement';
 import RoleManagement from './RoleManagement';
+import SuppliersMap from './SuppliersMap';
 
 const TABS = [
-  { id: 'users',  label: '👥 Users',     description: 'Create, edit & deactivate' },
-  { id: 'roles',  label: '🔑 Roles',     description: 'Assign user roles'         },
-  { id: 'audit',  label: '📋 Audit Log', description: 'Full system activity trail' },
+  { id: 'users',  label: '👥 Users',         description: 'Create, edit & deactivate' },
+  { id: 'roles',  label: '🔑 Roles',         description: 'Assign user roles'          },
+  { id: 'audit',  label: '📋 Audit Log',     description: 'Full system activity trail' },
+  { id: 'map',    label: '🗺️ Suppliers Map', description: 'Geographic supplier view'  },
 ];
 
 // ── Audit Log Sub-Component ───────────────────────────────────────────────────
@@ -227,6 +229,7 @@ function AdminDashboard() {
       case 'users': return <UserManagement />;
       case 'roles': return <RoleManagement />;
       case 'audit': return <AuditLog />;
+      case 'map':   return <SuppliersMap />;
       default:      return null;
     }
   };
