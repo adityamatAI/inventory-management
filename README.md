@@ -18,38 +18,75 @@ A full-stack inventory management system built for a college project. SmartStock
 
 ---
 
-## Getting Started
+## Running This Project (Setup Guide)
+
+> Follow these steps to get SmartStock running on any machine after cloning from GitHub.
 
 ### Prerequisites
-- Node.js v18+
-- npm
 
-### 1. Clone & Install
+You need the following installed before starting:
+
+| Tool | Version | Download |
+|---|---|---|
+| **Node.js** | v18 or higher | https://nodejs.org (download the LTS version) |
+| **npm** | Comes with Node.js | — |
+| **Git** | Any recent version | https://git-scm.com |
+
+To verify you have them, open a terminal and run:
+```bash
+node -v    # should print v18.x.x or higher
+npm -v     # should print 9.x.x or higher
+git --version
+```
+
+---
+
+### Step 1 — Clone the Repository
 
 ```bash
-# Install root dependencies (concurrently)
+git clone https://github.com/adityamatAI/inventory-management.git
+cd inventory-management
+```
+
+---
+
+### Step 2 — Install All Dependencies
+
+Run these three commands **in order** from the root folder:
+
+```bash
 npm install
-
-# Install backend dependencies
+```
+```bash
 cd backend && npm install && cd ..
-
-# Install frontend dependencies
+```
+```bash
 cd frontend && npm install && cd ..
 ```
 
-### 2. Configure Environment
+> This installs the root dev tools, all backend packages (Express, SQLite, JWT, etc.), and all frontend packages (React, Tailwind, etc.).
 
-The `backend/.env` file is already set up. If it doesn't exist, create it:
+---
+
+### Step 3 — Create the Environment File
+
+The `.env` file is not included in the repo (it's gitignored for security). You need to create it manually.
+
+Inside the `backend/` folder, create a file named `.env` with this content:
 
 ```env
 PORT=3001
-JWT_SECRET=your_secret_key_here
+JWT_SECRET=any_random_secret_string_here
 DB_PATH=./database.db
 ```
 
-### 3. Seed the Database
+> `JWT_SECRET` can be any string — it's used to sign auth tokens. Just don't leave it blank.
 
-Run this once to create all tables and populate demo data:
+---
+
+### Step 4 — Seed the Database
+
+This creates the SQLite database file and populates it with all demo data (users, items, suppliers, requests):
 
 ```bash
 cd backend
@@ -57,17 +94,42 @@ node src/utils/seedData.js
 cd ..
 ```
 
-This creates 8 inventory items, 4 users, 2 suppliers, and 5 pre-seeded requests in various states.
+You should see output ending with:
+```
+✅ Seeding completed successfully!
+Items seeded: 8 (3 below threshold)
+Requests seeded: 5 (pending, forwarded, accepted, delivered, closed)
+```
 
-### 4. Run the App
+---
+
+### Step 5 — Start the App
+
+From the root folder, run:
 
 ```bash
 npm run dev
 ```
 
-This starts both servers concurrently:
-- **Frontend:** http://localhost:5173
-- **Backend API:** http://localhost:3001
+This starts both servers at the same time:
+- 🌐 **Frontend:** http://localhost:5173
+- ⚙️ **Backend API:** http://localhost:3001
+
+Open http://localhost:5173 in your browser and log in with any of the test accounts below.
+
+---
+
+### Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `node: command not found` | Node.js is not installed — download from https://nodejs.org |
+| `Cannot find module 'better-sqlite3'` | Run `npm install` inside the `backend/` folder |
+| `EADDRINUSE: address already in use 3001` | Something else is using port 3001 — change `PORT=3002` in `.env` |
+| Frontend shows blank / network error | Make sure the backend is running (check terminal for errors) |
+| `database.db` not found | You skipped Step 4 — run the seed script |
+
+
 
 ---
 
