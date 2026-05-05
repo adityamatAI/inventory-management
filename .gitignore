@@ -1,0 +1,42 @@
+# ─── Dependencies ────────────────────────────────────────────────
+node_modules/
+
+# ─── Environment Variables (SECURITY - contains JWT secret etc.) ─
+**/.env
+**/.env.local
+**/.env.*.local
+
+# ─── Database Files ──────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ─── Build Output ────────────────────────────────────────────────
+dist/
+dist-ssr/
+
+# ─── Logs ────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ─── OS Files ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ─── Editor ──────────────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ─── Personal/Misc Docs ──────────────────────────────────────────
+SmartStock_Complete_Build_Plan.docx
