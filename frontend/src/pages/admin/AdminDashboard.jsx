@@ -67,6 +67,8 @@ function AuditLog() {
     fetchLogs(1, empty);
   };
 
+  
+
   return (
     <div>
       {/* Header */}
