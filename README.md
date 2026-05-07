@@ -2,6 +2,8 @@
 
 A full-stack inventory management system built for a college project. SmartStock automates the replenishment workflow for a retail/warehouse environment — from stock deduction by staff, through manager approval, to supplier fulfillment and receipt confirmation. Every action is logged in a full audit trail.
 
+GitHub Link: https://github.com/adityamatAI/inventory-management
+
 ---
 
 ## Tech Stack
